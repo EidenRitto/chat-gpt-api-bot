@@ -2,7 +2,7 @@ package cn.eiden.gpt.bot.mirai.callback;
 
 import cn.eiden.gpt.model.ChatCompletionResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.message.data.*;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -19,22 +20,22 @@ import java.util.stream.Collectors;
  * @date 2023/12/13
  */
 public class GroupMessageGptCallback implements Callback {
-    private final Group group;
-    private final long userId;
+
+    private final Consumer<String> sendMessageAction;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public GroupMessageGptCallback(Group group, long userId) {
-        this.group = group;
-        this.userId = userId;
+    public GroupMessageGptCallback(Consumer<String> sendMessageAction) {
+        this.sendMessageAction = sendMessageAction;
     }
 
     @Override
     public void onFailure(@NotNull Call call, @NotNull IOException e) {
-        group.sendMessage(new MessageChainBuilder()
-                .append(new At(userId))
-                .append(" ")
-                .append(new PlainText("gpt服务异常"))
-                .build());
+        sendMessageAction.accept("gpt服务异常");
+//        contact.sendMessage(new MessageChainBuilder()
+//                .append(new At(userId))
+//                .append(" ")
+//                .append(new PlainText("gpt服务异常"))
+//                .build());
     }
 
     @Override
@@ -56,7 +57,8 @@ public class GroupMessageGptCallback implements Callback {
                                 .map(ChatCompletionResponse.Choice.Message::getContent)
                                 .collect(Collectors.joining("\n"));
                     }
-                    group.sendMessage(new MessageChainBuilder().append(new At(userId)).append(" ").append(new PlainText(text)).build());
+                    sendMessageAction.accept(text);
+//                    contact.sendMessage(new MessageChainBuilder().append(new At(userId)).append(" ").append(new PlainText(text)).build());
                 }
             }
         }

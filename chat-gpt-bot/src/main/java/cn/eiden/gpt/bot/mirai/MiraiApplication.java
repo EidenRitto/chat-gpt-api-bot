@@ -1,6 +1,6 @@
 package cn.eiden.gpt.bot.mirai;
 
-import cn.eiden.gpt.bot.mirai.events.GroupEvent;
+import cn.eiden.gpt.bot.mirai.events.BotGroupEvent;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.auth.BotAuthorization;
@@ -19,11 +19,8 @@ public class MiraiApplication {
         bot.login();
         //输出好友
         bot.getFriends().forEach(friend -> System.out.println(friend.getId() + ":" + friend.getNick()));
-        bot.getEventChannel().registerListenerHost(new GroupEvent());
-//
-        System.out.println();
+        bot.getEventChannel().registerListenerHost(new BotGroupEvent());
         System.out.println("系统启动完成！");
-
         //阻塞当前线程
         bot.join();
     }
