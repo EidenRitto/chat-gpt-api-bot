@@ -33,7 +33,7 @@ public class BotGroupEvent extends SimpleListenerHost {
                 .append(" ")
                 .append(new PlainText(message))
                 .build());
-        this.handlerGroup(event, event.getGroup(), sendMessageAction);
+        this.handlerGroup(event, sendMessageAction);
         //保持监听
         return ListeningStatus.LISTENING;
     }
@@ -43,13 +43,13 @@ public class BotGroupEvent extends SimpleListenerHost {
         Consumer<String> sendMessageAction = message -> event.getFriend().sendMessage(new MessageChainBuilder()
                 .append(new PlainText(message))
                 .build());
-        this.handlerGroup(event, event.getFriend(), sendMessageAction);
+        this.handlerGroup(event, sendMessageAction);
         //保持监听
         return ListeningStatus.LISTENING;
     }
 
 
-    private void handlerGroup(MessageEvent event, Contact contact, Consumer<String> sendMessageAction) {
+    private void handlerGroup(MessageEvent event, Consumer<String> sendMessageAction) {
         long sendId = event.getSender().getId();
         String nick = event.getSender().getNick();
         MessageChain messageChain = event.getMessage();
@@ -60,11 +60,7 @@ public class BotGroupEvent extends SimpleListenerHost {
             String message = messageChain.contentToString();
             if (message.contains(BotSystemMessageConstant.NEW_SESSION_KEY)) {
                 groupMemberMessageContext.computeIfAbsent(sendId, k -> new ArrayList<>()).clear();
-                contact.sendMessage(new MessageChainBuilder()
-                        .append(new At(sendId))
-                        .append(" ")
-                        .append(new PlainText(BotSystemMessageConstant.NEW_SESSION))
-                        .build());
+                sendMessageAction.accept(BotSystemMessageConstant.NEW_SESSION);
                 return;
             }
             // 上下文联想
@@ -74,11 +70,7 @@ public class BotGroupEvent extends SimpleListenerHost {
             contextMessage.add(message);
             if (contextMessage.size() > 15) {
                 contextMessage.clear();
-                contact.sendMessage(new MessageChainBuilder()
-                        .append(new At(sendId))
-                        .append(" ")
-                        .append(new PlainText(BotSystemMessageConstant.CHAT_SESSION_FULL))
-                        .build());
+                sendMessageAction.accept(BotSystemMessageConstant.CHAT_SESSION_FULL);
             }
         }
     }
