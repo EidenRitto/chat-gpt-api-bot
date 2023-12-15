@@ -1,6 +1,7 @@
 package cn.eiden.gpt.api;
 
 import cn.eiden.gpt.model.ChatCompletions;
+import cn.eiden.gpt.model.ChatMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
@@ -26,14 +27,14 @@ public class ChatCompletionApi {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String apiUrl = "http://localhost:8181/eiden_api_v1/v1/chat/completions";
 
-    public static Request createChatCompletionRequest(String message,String... messageContext) throws JsonProcessingException {
+    public static Request createChatCompletionRequest(List<ChatMessage> chatMessages) throws JsonProcessingException {
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
 
         ChatCompletions chatCompletions = new ChatCompletions();
         chatCompletions.setModel("gpt-3.5-turbo");
 
-        List<ChatCompletions.ChatMessage> messages = getChatMessages(message, messageContext);
-        chatCompletions.setMessages(messages);
+        chatMessages.get(0).setRole("system");
+        chatCompletions.setMessages(chatMessages);
         String content = objectMapper.writeValueAsString(chatCompletions);
 
         RequestBody body = RequestBody.create(content.getBytes(StandardCharsets.UTF_8),mediaType);
@@ -44,29 +45,12 @@ public class ChatCompletionApi {
                 .build();
     }
 
-    public static void sendMessageWithCallback(Callback callback, String message, String... messageContext){
+    public static void sendMessageWithCallback(Callback callback, List<ChatMessage> chatMessages){
         try {
-            Request request = createChatCompletionRequest(message, messageContext);
+            Request request = createChatCompletionRequest(chatMessages);
             client.newCall(request).enqueue(callback);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-    }
-
-    @NotNull
-    private static List<ChatCompletions.ChatMessage> getChatMessages(String message, String[] messageContext) {
-        List<ChatCompletions.ChatMessage> messages = new ArrayList<>();
-        ChatCompletions.ChatMessage chatMessage = new ChatCompletions.ChatMessage();
-        chatMessage.setRole("system");
-        chatMessage.setContent(message);
-        messages.add(chatMessage);
-
-        for (String messageText : messageContext) {
-            ChatCompletions.ChatMessage contextMessage = new ChatCompletions.ChatMessage();
-            contextMessage.setRole("user");
-            contextMessage.setContent(messageText);
-            messages.add(contextMessage);
-        }
-        return messages;
     }
 }

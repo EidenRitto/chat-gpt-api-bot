@@ -2,6 +2,7 @@ package cn.eiden.gpt;
 
 import cn.eiden.gpt.model.ChatCompletionResponse;
 import cn.eiden.gpt.model.ChatCompletions;
+import cn.eiden.gpt.model.ChatMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
@@ -50,7 +51,7 @@ public class ApiApplication {
 
         ChatCompletions chatCompletions = new ChatCompletions();
         chatCompletions.setModel("gpt-3.5-turbo");
-        ChatCompletions.ChatMessage message = new ChatCompletions.ChatMessage();
+        ChatMessage message = new ChatMessage();
         message.setRole("system");
         message.setContent(messageText);
         chatCompletions.setMessages(List.of(message));

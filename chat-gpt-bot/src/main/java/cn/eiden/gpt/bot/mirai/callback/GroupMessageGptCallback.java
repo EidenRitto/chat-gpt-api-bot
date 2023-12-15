@@ -2,8 +2,6 @@ package cn.eiden.gpt.bot.mirai.callback;
 
 import cn.eiden.gpt.model.ChatCompletionResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.message.data.*;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -22,20 +20,17 @@ import java.util.stream.Collectors;
 public class GroupMessageGptCallback implements Callback {
 
     private final Consumer<String> sendMessageAction;
+    private final Consumer<String> postProcess;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public GroupMessageGptCallback(Consumer<String> sendMessageAction) {
+    public GroupMessageGptCallback(Consumer<String> sendMessageAction, Consumer<String> postProcess) {
         this.sendMessageAction = sendMessageAction;
+        this.postProcess = postProcess;
     }
 
     @Override
     public void onFailure(@NotNull Call call, @NotNull IOException e) {
-        sendMessageAction.accept("gpt服务异常");
-//        contact.sendMessage(new MessageChainBuilder()
-//                .append(new At(userId))
-//                .append(" ")
-//                .append(new PlainText("gpt服务异常"))
-//                .build());
+        sendMessageAction.accept("服务异常");
     }
 
     @Override
@@ -58,7 +53,7 @@ public class GroupMessageGptCallback implements Callback {
                                 .collect(Collectors.joining("\n"));
                     }
                     sendMessageAction.accept(text);
-//                    contact.sendMessage(new MessageChainBuilder().append(new At(userId)).append(" ").append(new PlainText(text)).build());
+                    postProcess.accept(text);
                 }
             }
         }
