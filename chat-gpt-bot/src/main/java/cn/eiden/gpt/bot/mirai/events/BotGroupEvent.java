@@ -35,7 +35,7 @@ public class BotGroupEvent extends SimpleListenerHost {
         Consumer<String> postProcess = message -> {
             groupMemberMessageContext.get(event.getSender().getId()).add(new ChatMessage("assistant", message));
         };
-        this.handlerGroup(event, postProcess, sendMessageAction);
+        this.handlerGroup(event, sendMessageAction, postProcess);
         //保持监听
         return ListeningStatus.LISTENING;
     }
@@ -48,7 +48,7 @@ public class BotGroupEvent extends SimpleListenerHost {
         Consumer<String> postProcess = message -> {
             groupMemberMessageContext.get(event.getFriend().getId()).add(new ChatMessage("assistant", message));
         };
-        this.handlerGroup(event, postProcess, sendMessageAction);
+        this.handlerGroup(event, sendMessageAction, postProcess);
         //保持监听
         return ListeningStatus.LISTENING;
     }
